@@ -1,45 +1,55 @@
 const Router = {
     init: () => {
         document.querySelectorAll("a.navlink").forEach(a => {
-            a.addEventListener("click", (event) => {
+            a.addEventListener("click", event => {
                 event.preventDefault();
-                const href = event.target.getAttribute("href");
-                Router.go(href);
+                // const url1 = event.target.href;
+                const url = event.target.getAttribute("href");
+                Router.go(url);
             });
-        });
-        window.addEventListener("popstate", (event) => {
-            Router.go(event.state.route, false);
         })
+        // Event Handler for URL changes
+        window.addEventListener("popstate", event => {
+            Router.go(event.state.route, false);
+        });
+
+        // Check the initial URL
         Router.go(location.pathname);
     },
     go: (route, addToHistory=true) => {
+        console.log(`Going to ${route}`);
+
         if (addToHistory) {
-            history.pushState({ route }, "", route);
+            history.pushState({ route }, '', route);
         }
-        let pageElement = null
+        let pageElement = null;
         switch (route) {
             case "/":
                 pageElement = document.createElement("menu-page");
                 break;
             case "/order":
                 pageElement = document.createElement("order-page");
-                pageElement.textContent = "Your cart";
-                break
+                break;
             default:
-                console.log(`route: ${route}`)
-                if (route.startsWith("product-")) {
+                if (route.startsWith("/product-")) {
                     pageElement = document.createElement("details-page");
-                    pageElement.textContent = "Details";
-                    const paramId = route.substring(route.lastIndexOf("-") + 1);
-                    pageElement.dataset.id = paramId;
+                    const paramId = route.substring(route.lastIndexOf("-")+1);
+                    pageElement.dataset.productId = paramId;
                 }
         }
-
         if (pageElement) {
-            document.querySelector("main").innerHTML = "";
-            document.querySelector("main").appendChild(pageElement);
+            // document.querySelector("main").children[0].remove();
+            const cache = document.querySelector("main");
+            cache.innerHTML = "";
+            cache.appendChild(pageElement);
+            window.scrollX = 0;
+            window.scrollY = 0;
+
+        } else {
+            // 404
+            document.querySelector("main").innerHTML = "Oups, 404!"
+
         }
     }
 }
-
-export default Router
+export default Router;
